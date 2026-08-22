@@ -7,9 +7,8 @@
     <style>
         body { font-family: Arial, sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; }
         .container { max-width: 500px; margin: auto; background: #1e293b; padding: 20px; border-radius: 12px; }
-        input, textarea, select, button { width: 100%; margin-top: 10px; padding: 12px; border-radius: 8px; border: none; box-sizing: border-box; }
-        textarea { height: 90px; font-size: 15px; }
-        input { font-size: 14px; background: #334155; color: white; }
+        textarea, select, button { width: 100%; margin-top: 10px; padding: 12px; border-radius: 8px; border: none; box-sizing: border-box; }
+        textarea { height: 110px; font-size: 16px; }
         button { background: #38bdf8; color: black; font-weight: bold; cursor: pointer; font-size: 16px; }
         #output { margin-top: 20px; text-align: left; background: #0f172a; padding: 15px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; min-height: 100px; }
     </style>
@@ -18,9 +17,7 @@
     <div class="container">
         <h2>🎬 AI Video Generator</h2>
         
-        <input type="password" id="userApiKey" placeholder="यहाँ अपनी Groq API Key (gsk_...) पेस्ट करें">
-        
-        <textarea id="userPrompt" placeholder="अपना Topic लिखें..."></textarea>
+        <textarea id="userPrompt" placeholder="अपना Topic लिखें (जैसे: Gaming Motivation Status)..."></textarea>
         
         <select id="duration">
             <option value="1">1 Minute</option>
@@ -38,55 +35,42 @@
     </div>
 
     <script>
-        // Save Key in Browser Storage
-        document.addEventListener("DOMContentLoaded", () => {
-            const savedKey = localStorage.getItem("groq_key");
-            if(savedKey) document.getElementById('userApiKey').value = savedKey;
-        });
-
         async function generateScript() {
-            const apiKey = document.getElementById('userApiKey').value.trim();
             const prompt = document.getElementById('userPrompt').value;
             const duration = document.getElementById('duration').value;
             const language = document.getElementById('language').value;
             const output = document.getElementById('output');
-
-            if (!apiKey) {
-                alert("कृपया पहले अपनी Groq API Key डालें!");
-                return;
-            }
 
             if (!prompt.trim()) {
                 alert("कृपया पहले कोई Topic लिखें!");
                 return;
             }
 
-            // Save Key for future use
-            localStorage.setItem("groq_key", apiKey);
-
             output.innerText = "⏳ AI से स्क्रिप्ट जनरेट हो रही है, थोड़ा इंतज़ार करें...";
 
             const systemPrompt = `आप एक एक्सपर्ट यूट्यूब वीडियो स्क्रिप्ट राइटर हैं। कृपया इस टॉपिक पर ${duration} मिनट की वीडियो स्क्रिप्ट ${language} भाषा में लिखें। इसे Scenes और Dialogue में बाँटें:\n\nTopic: ${prompt}`;
 
             try {
-                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${apiKey}`
-                    },
+                // Using reliable public AI endpoint (No API key required, no CORS error)
+                const response = await fetch(`https://text.pollinations.ai/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        model: "llama-3.1-8b-instant",
-                        messages: [{ role: "user", content: systemPrompt }]
+                        messages: [{ role: "user", content: systemPrompt }],
+                        model: "openai",
+                        seed: Math.floor(Math.random() * 1000000)
                     })
                 });
 
-                const data = await response.json();
+                const scriptText = await response.text();
 
-                if (data.choices && data.choices[0] && data.choices[0].message) {
-                    output.innerText = data.choices[0].message.content;
+                if (scriptText && scriptText.length > 10 && !scriptText.includes("402")) {
+                    output.innerText = scriptText;
                 } else {
-                    output.innerText = "❌ गलत API Key या सर्वर एरर। कृपया नई Key डालकर देखें।";
+                    // Fallback to GET method if POST fails
+                    const res2 = await fetch(`https://text.pollinations.ai/${encodeURIComponent(systemPrompt)}?model=mistral`);
+                    const text2 = await res2.text();
+                    output.innerText = text2;
                 }
             } catch (error) {
                 output.innerText = "❌ नेटवर्क एरर। कृपया दोबारा कोशिश करें।";
