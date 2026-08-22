@@ -1,57 +1,38 @@
 <!DOCTYPE html>
 <html lang="hi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>AI Video Generator</title>
-
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Video Generator</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f172a; color: white; text-align: center; padding: 20px; }
+        .container { max-width: 500px; margin: auto; background: #1e293b; padding: 20px; border-radius: 12px; }
+        textarea, select, button { width: 100%; margin-top: 10px; padding: 12px; border-radius: 8px; border: none; box-sizing: border-box; }
+        textarea { height: 100px; }
+        button { background: #38bdf8; color: black; font-weight: bold; cursor: pointer; font-size: 16px; }
+        #output { margin-top: 20px; text-align: left; background: #0f172a; padding: 15px; border-radius: 8px; white-space: pre-wrap; word-break: break-word; }
+    </style>
 </head>
-
 <body>
+    <div class="container">
+        <h2>🎬 AI Video Generator</h2>
+        <textarea id="userPrompt" placeholder="अपना Topic लिखें..."></textarea>
+        
+        <select id="duration">
+            <option value="1">1 Minute</option>
+            <option value="3">3 Minutes</option>
+        </select>
 
-  <div class="container">
+        <select id="language">
+            <option value="Hindi">Hindi</option>
+            <option value="English">English</option>
+        </select>
 
-    <h1>🎬 AI Video Generator</h1>
+        <button onclick="generateVideo()">🚀 Generate Video</button>
 
-    <p class="subtitle">
-      अपना idea लिखो और video बनाना शुरू करो।
-    </p>
+        <div id="output">आपकी AI स्क्रिप्ट यहाँ दिखेगी...</div>
+    </div>
 
-    <textarea
-      id="prompt"
-      placeholder="उदाहरण: भारत के इतिहास पर 10 मिनट की documentary बनाओ..."
-    ></textarea>
-
-    <label>Video Duration</label>
-
-    <select id="duration">
-      <option value="1">1 Minute</option>
-      <option value="5">5 Minutes</option>
-      <option value="10">10 Minutes</option>
-      <option value="30">30 Minutes</option>
-      <option value="60">1 Hour</option>
-      <option value="120">2 Hours</option>
-    </select>
-
-    <label>Language</label>
-
-    <select id="language">
-      <option value="Hindi">Hindi</option>
-      <option value="English">English</option>
-      <option value="Hinglish">Hinglish</option>
-    </select>
-
-    <button onclick="generateVideoPlan()">
-      🚀 Generate Video
-    </button>
-
-    <div id="result"></div>
-
-  </div>
-
-  <script src="app.js"></script>
-
+    <script src="app.js"></script>
 </body>
-  </html>
+</html>
