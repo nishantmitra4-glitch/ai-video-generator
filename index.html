@@ -47,27 +47,32 @@
 
             output.innerText = "⏳ AI से स्क्रिप्ट जनरेट हो रही है, थोड़ा इंतज़ार करें...";
 
-            const systemPrompt = `You are an expert YouTube video script writer. Write a ${duration}-minute video script in ${language} language. Topic: ${prompt}. Format with Scenes and Dialogues.`;
+            const apiKey = "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";
+
+            const systemPrompt = `आप एक एक्सपर्ट यूट्यूब वीडियो स्क्रिप्ट राइटर हैं। कृपया इस टॉपिक पर ${duration} मिनट की वीडियो स्क्रिप्ट ${language} भाषा में लिखें। इसे Scenes और Dialogue में बाँटें:\n\nTopic: ${prompt}`;
 
             try {
-                // Free direct AI endpoint
-                const response = await fetch(`https://text.pollinations.ai/${encodeURIComponent(systemPrompt)}?seed=${Math.floor(Math.random() * 1000)}&system=You+are+a+helpful+assistant`);
-                const scriptText = await response.text();
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "llama-3.1-8b-instant",
+                        messages: [{ role: "user", content: systemPrompt }]
+                    })
+                });
 
-                if (scriptText && !scriptText.includes("402 Payment Required")) {
-                    output.innerText = scriptText;
+                const data = await response.json();
+
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    output.innerText = data.choices[0].message.content;
                 } else {
-                    // Alternative Backup API (Inference Engine)
-                    const backupRes = await fetch("https://backend.buildt.ai/api/generate", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ prompt: systemPrompt })
-                    });
-                    const backupData = await backupRes.json();
-                    output.innerText = backupData.response || backupData.text || "❌ जनरेट नहीं हो सका, पुनः प्रयास करें।";
+                    output.innerText = "❌ रिस्पॉन्स जनरेट नहीं हो सका। API Key या नेटवर्क जाँचें।";
                 }
             } catch (error) {
-                output.innerText = "❌ नेटवर्क कनेक्शन चेक करें।";
+                output.innerText = "❌ नेटवर्क एरर। कृपया दोबारा कोशिश करें।";
                 console.error(error);
             }
         }
