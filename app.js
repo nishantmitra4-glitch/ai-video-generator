@@ -6,16 +6,16 @@ async function generateVideo() {
     
     const API_KEY = "AQ.Ab8RN6JESrVYQYiu9_hHzfBmnwRxrDuFlC9_DtSqWXfF9GQ15Q"; 
 
-    if(prompt.trim() === "") {
-        alert("कृपया पहले कोई Prompt लिखें!");
+    if (!prompt.trim()) {
+        alert("कृपया पहले कोई Topic लिखें!");
         return;
     }
 
-    output.innerText = "⏳ Gemini AI से स्क्रिप्ट जनरेट हो रही है, थोड़ा इंतज़ार करें...";
+    output.innerText = "⏳ Gemini AI से स्क्रिप्ट जनरेट हो रही है...";
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-    const systemPrompt = `आप एक एक्सपर्ट वीडियो स्क्रिप्ट राइटर हैं। कृपया नीचे दिए गए टॉपिक पर ${duration} मिनट की वीडियो स्क्रिप्ट ${language} भाषा में लिखें। स्क्रिप्ट को स्पष्ट Scenes और Dialogues में बाँटें:\n\nTopic: ${prompt}`;
+    const systemPrompt = `आप एक एक्सपर्ट वीडियो स्क्रिप्ट राइटर हैं। कृपया इस टॉपिक पर ${duration} मिनट की वीडियो स्क्रिप्ट ${language} भाषा में लिखें। इसे Scenes और Dialogue में बाँटें:\n\nTopic: ${prompt}`;
 
     try {
         const response = await fetch(url, {
@@ -27,11 +27,14 @@ async function generateVideo() {
         });
 
         const data = await response.json();
-        const scriptText = data.candidates[0].content.parts[0].text;
         
-        output.innerHTML = `<div style="text-align:left; background:#222; padding:15px; border-radius:8px; white-space:pre-wrap;">🎬 <b>AI Script Generated:</b>\n\n${scriptText}</div>`;
+        if (data.candidates && data.candidates[0].content.parts[0].text) {
+            output.innerText = data.candidates[0].content.parts[0].text;
+        } else {
+            output.innerText = "❌ AI से रिस्पॉन्स नहीं मिला। फिर से कोशिश करें।";
+        }
     } catch (error) {
-        output.innerText = "❌ कुछ गलती हुई है, फिर से कोशिश करें।";
+        output.innerText = "❌ एरर आया है, कृपया अपना इंटरनेट या API Key चेक करें।";
         console.error(error);
     }
 }
