@@ -49,20 +49,25 @@
 
             const systemPrompt = `आप एक एक्सपर्ट यूट्यूब वीडियो स्क्रिप्ट राइटर हैं। कृपया इस टॉपिक पर ${duration} मिनट की वीडियो स्क्रिप्ट ${language} भाषा में लिखें। इसे Scenes और Dialogue में बाँटें:\n\nTopic: ${prompt}`;
 
+            const apiKey = "gsk_y2R23J0D1S4S6Gf0FfP1WGdyb3FY0Yy51h6Q7V7O6C9A";
+
             try {
-                const response = await fetch("https://text.pollinations.ai/", {
+                const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${apiKey}`
+                    },
                     body: JSON.stringify({
-                        messages: [{ role: "user", content: systemPrompt }],
-                        model: "openai"
+                        model: "llama-3.1-8b-instant",
+                        messages: [{ role: "user", content: systemPrompt }]
                     })
                 });
 
-                const scriptText = await response.text();
+                const data = await response.json();
 
-                if (scriptText && scriptText.length > 5) {
-                    output.innerText = scriptText;
+                if (data.choices && data.choices[0] && data.choices[0].message) {
+                    output.innerText = data.choices[0].message.content;
                 } else {
                     output.innerText = "❌ रिस्पॉन्स जनरेट नहीं हो सका। कृपया दोबारा कोशिश करें।";
                 }
