@@ -1,43 +1,37 @@
-function generateVideoPlan() {
+async function generateVideo() {
+    const prompt = document.getElementById('userPrompt').value;
+    const duration = document.getElementById('duration').value;
+    const language = document.getElementById('language').value;
+    const output = document.getElementById('output');
+    
+    const API_KEY = "AQ.Ab8RN6JESrVYQYiu9_hHzfBmnwRxrDuFlC9_DtSqWXfF9GQ15Q"; 
 
-  const prompt = document.getElementById("prompt").value.trim();
-  const duration = document.getElementById("duration").value;
-  const language = document.getElementById("language").value;
-  const result = document.getElementById("result");
+    if(prompt.trim() === "") {
+        alert("कृपया पहले कोई Prompt लिखें!");
+        return;
+    }
 
-  if (!prompt) {
-    result.innerText = "पहले अपना video idea लिखो।";
-    return;
-  }
+    output.innerText = "⏳ Gemini AI से स्क्रिप्ट जनरेट हो रही है, थोड़ा इंतज़ार करें...";
 
-  const scenes = Math.max(5, Math.ceil(Number(duration) * 2));
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
 
-  result.innerText =
-`🎬 VIDEO PLAN
+    const systemPrompt = `आप एक एक्सपर्ट वीडियो स्क्रिप्ट राइटर हैं। कृपया नीचे दिए गए टॉपिक पर ${duration} मिनट की वीडियो स्क्रिप्ट ${language} भाषा में लिखें। स्क्रिप्ट को स्पष्ट Scenes और Dialogues में बाँटें:\n\nTopic: ${prompt}`;
 
-Topic:
-${prompt}
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                contents: [{ parts: [{ text: systemPrompt }] }]
+            })
+        });
 
-Duration:
-${duration} minute(s)
-
-Language:
-${language}
-
-Estimated Scenes:
-${scenes}
-
-STATUS
-
-✅ Prompt received
-✅ Duration selected
-✅ Language selected
-
-⏳ AI script generation
-⏳ Scene generation
-⏳ Voice generation
-⏳ Visual generation
-⏳ Video rendering
-
-अगले चरण में हम वास्तविक AI system जोड़ेंगे।`;
+        const data = await response.json();
+        const scriptText = data.candidates[0].content.parts[0].text;
+        
+        output.innerHTML = `<div style="text-align:left; background:#222; padding:15px; border-radius:8px; white-space:pre-wrap;">🎬 <b>AI Script Generated:</b>\n\n${scriptText}</div>`;
+    } catch (error) {
+        output.innerText = "❌ कुछ गलती हुई है, फिर से कोशिश करें।";
+        console.error(error);
+    }
 }
